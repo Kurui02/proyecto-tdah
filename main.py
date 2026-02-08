@@ -2,6 +2,7 @@ import pygame
 import random
 import sys
 import math
+import json
 
 pygame.init()
 screen_width, screen_height = 1200, 800
@@ -14,14 +15,17 @@ color_texto= (45,52,54)
 color_aciertos= (85,239,196)
 white=(255,255,255)
 
+with open("Imagenes_F.JSON","r") as imgF:
+    img_F = json.load(imgF)
+
 class GameState:
     def __init__(self):
         self.state = 'MENU'
         self.difficulty = None
         self.current_stage = 0
         self.total_stages = 10
-        self.stage_pool = [] #lista para generar un pool de imagenes para que no sean las mismas siempre
-        self.found_difs = [] #lista para guardar los clicks correctos 
+        self.stage_pool = {"F":img_F} #lista para generar un pool de imagenes para que no sean las mismas siempre
+        self.found_difs = {"F":img_F} #lista para guardar los clicks correctos 
         self.difs_actuales = [] #lista de (x, y) del nivel actual
         self.circles_draw = []
         self.font_title = pygame.font.SysFont("Arial", 80, bold=True)
@@ -53,6 +57,9 @@ class GameState:
         self.circles_draw = []
         print(f"Iniciando Dificultad : {self.difficulty}")
         #Aqui se cargaria la pool y se barajaria (random.shuffle)
+        if self.difficulty == 'Facil':
+    
+                       
         #self.difs_actuales = pool[self.current_stage]['diferencias']
         
 
@@ -82,6 +89,10 @@ class GameState:
         self.draw_hud()
 
         #Aqui iria la logica para las imagenes
+        img_a = pygame.image.load()
+        screen.blit(img_a, (50,150))
+        img_b = pygame.image.load()
+        screen.blit(img_b, (650,150))
 
         for pos in self.circles_draw:
             pygame.draw.circle(screen, color_aciertos, pos, 35, 5)
@@ -95,7 +106,7 @@ class GameState:
             distancia = math.sqrt((pos[0] - dx)**2 + (pos[1] - dy)**2)
             if distancia < 35 and i not in self.found_difs:
                 self.found_difs.append(i)
-                self.circles_to_draw.append((dx, dy))
+                self.circles_draw.append((dx, dy))
 
                 if len(self.found_difs) == len(self.difs_actuales):
                     self.pasar_siguiente_stage()

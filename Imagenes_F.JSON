@@ -1,0 +1,32 @@
+
+{
+"imgs": [
+{
+    "id1": {
+        "img_izq": "Imagenes/Facil/F_1A",
+        "img_der": "Imagenes/Facil/F_1B",
+        "punto1": [400,350],
+        "punto2": [300,150],
+        "punto3": [50,55]
+        }
+},
+{
+    "id2": {
+        "img_izq": "Imagenes/Facil/F_2A",
+        "img_der": "Imagenes/Facil/F_2B",
+        "punto1": [165,217],
+        "punto2": [470,330],
+        "punto3": [53,60]
+        }
+},
+{
+    "id3": {
+        "img_izq": "Imagenes/Facil/F_3A",
+        "img_der": "Imagenes/Facil/F_3B",
+        "punto1": [60,200],
+        "punto2": [400,130],
+        "punto3": [50,50]
+        }
+}
+]
+}
