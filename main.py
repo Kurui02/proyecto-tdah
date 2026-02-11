@@ -5,25 +5,29 @@ import math
 import json
 
 pygame.init()
-screen_width, screen_height = 1200, 800
+pygame.mixer.init()
+screen_width, screen_height = 1280, 720
 screen = pygame.display.set_mode((screen_width,screen_height))
 
-color_fondo= (235,245,255)
-color_boton= (116,185,255)
-color_hover= (162,210,255)
-color_texto= (45,52,54)
+color_fondo= (55,55,60)
+color_boton= (160,196,255)
+color_hover= (160,246,255)
+color_texto= (240,240,240)
 color_aciertos= (85,239,196)
 white=(255,255,255)
+
+sonido_acierto = pygame.mixer.Sound("sonido/acierto.mp3")
+sonido_win = pygame.mixer.Sound("sonido/win.mp3")
 
 class GameState:
     def __init__(self):
         self.state = 'MENU'
         self.difficulty = None
         self.current_stage = 0
-        self.total_stages = 10
-        self.stage_pool = [] #lista para generar un pool de imagenes para que no sean las mismas siempre
-        self.found_difs = [] #lista para guardar los clicks correctos 
-        self.difs_actuales = [] #lista de (x, y) del nivel actual
+        self.total_stages = 0
+        self.stage_pool = []
+        self.found_difs = [] 
+        self.difs_actuales = [] 
         self.circles_draw = []
 
         with open("Imagenes_F.JSON","r") as imgF:
@@ -59,10 +63,19 @@ class GameState:
         self.current_stage = 1
 
         if self.difficulty == 'Facil':
-            self.stage_pool = self.all_data.copy()
-            random.shuffle(self.stage_pool)
-            self.total_stages = len(self.stage_pool)
-            self.cargar_stage_actual()
+            cantidad = 5
+        elif self.difficulty == 'Medio':
+            cantidad = 8
+        else: 
+            cantidad = 10
+        
+        pool_total = len(self.all_data)
+        n_selecionar = min(cantidad, pool_total)
+
+        self.stage_pool = random.sample(self.all_data, n_selecionar)
+        self.total_stages = len(self.stage_pool)
+
+        self.cargar_stage_actual()
 
     def cargar_stage_actual(self):
         self.found_difs = []
@@ -106,9 +119,19 @@ class GameState:
 
         ui_text = self.font_ui.render(f"Dificultad: {self.difficulty} | Stage: {self.current_stage}/{self.total_stages}", True, color_texto)
         screen.blit(ui_text, (20,20))
+    
+    def animacion(self):
+        rect_progreso = 0
+        velocidad = 20
+        while rect_progreso < screen_width:
+            pygame.draw.rect(screen, color_fondo, (0, 0, rect_progreso, screen_height))
+            
+            pygame.display.update()
+            rect_progreso += velocidad
+            pygame.time.Clock().tick(60)
 
     def draw_stage(self):
-        screen.fill(white)
+        screen.fill(color_fondo)
         self.draw_hud()
 
         
@@ -125,20 +148,27 @@ class GameState:
         pygame.display.flip()
     
     def procesar_clic(self, pos):
-        #dx, dy son las coordenadas de las imagenes ya sean con JSON para que no este todo en el codigo o como sea
         for i , (dx, dy) in enumerate(self.difs_actuales):
             distancia = math.sqrt((pos[0] - dx)**2 + (pos[1] - dy)**2)
             if distancia < 35 and i not in self.found_difs:
                 self.found_difs.append(i)
                 self.circles_draw.append((dx, dy))
 
+                if sonido_acierto:
+                    sonido_acierto.play()
+
                 if len(self.found_difs) == len(self.difs_actuales):
+                    self.draw_stage()
+                    pygame.time.delay(500)
+                    self.animacion()
                     self.pasar_siguiente_stage()
     def pasar_siguiente_stage(self):
         if self.current_stage < self.total_stages:
             self.current_stage +=1
             self.cargar_stage_actual()
         else:
+            if sonido_win:
+                sonido_win.play()
             self.state = 'Victory'
     
     def draw_victory(self):
