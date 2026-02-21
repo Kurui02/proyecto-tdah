@@ -30,6 +30,8 @@ pygame.mixer.music.play(-1)
 img_background = pygame.image.load("Imagenes/menu.jpg").convert()
 img_background = pygame.transform.smoothscale(img_background, (screen_width, screen_height))
 
+#facil : 3 imamagenes, medio 6 , 9 dificil,
+# comprobar que todo funcione bien y que se vean las imagenes correspondientes en cada dificultad
 
 class GameState:
     def __init__(self):
