@@ -27,6 +27,8 @@ pygame.mixer.music.load("sonido/menu.mp3")
 pygame.mixer.music.set_volume(0.1)
 pygame.mixer.music.play(-1)
 
+img_title = pygame.image.load("Imagenes/Titulo.png")
+
 img_background = pygame.image.load("Imagenes/menu.jpg").convert()
 img_background = pygame.transform.smoothscale(img_background, (screen_width, screen_height))
 
@@ -53,7 +55,13 @@ class GameState:
         self.zoom_dir = 0.5
 
         with open("Imagenes_F.JSON","r") as imgF:
-            self.all_data = json.load(imgF)["imgs"]
+            self.all_data_F = json.load(imgF)["imgs"]
+        
+        with open("Imagenes_M.JSON","r") as imgM:
+            self.all_data_M = json.load(imgM)["imgs"]
+        
+        with open("Imagenes_D.JSON","r") as imgD:
+            self.all_data_D = json.load(imgD)["imgs"]
 
         self.font_title = pygame.font.SysFont("Arial", 80, bold=True)
         self.font_btns = pygame.font.SysFont("Arial", 35 , bold=True)
@@ -112,11 +120,9 @@ class GameState:
             screen.blit(img_background,(0,0))
         else:
             screen.fill(color_fondo)
+            
         
-        titulo = self.font_title.render("PROYECTO", True, white)
-        sombra_tit = self.font_title.render("PROYECTO", True, (0,0,0))
-        screen.blit(sombra_tit, (screen_width//2 - titulo.get_width()//2 + 5, 125))
-        screen.blit(titulo, (screen_width//2 - titulo.get_width()//2, 120))
+        screen.blit(img_title, (screen_width//2 - img_title.get_width()//2, 25))
 
         self.btn_jugar = self.crear_boton("JUGAR", 320, palpitar=True)
         self.btn_salir = self.crear_boton("SALIR", 450)
@@ -184,10 +190,22 @@ class GameState:
         self.current_stage = 1
 
         cantidad = 5 if self.difficulty == 'Facil' else 8 if self.difficulty == 'Medio' else 10
-        pool_total = len(self.all_data)
-        n_selecionar = min(cantidad, pool_total)
-        self.stage_pool = random.sample(self.all_data, n_selecionar)
-        self.total_stages = len(self.stage_pool)
+        if self.difficulty == 'Facil':
+            pool_total = len(self.all_data_F)
+            n_selecionar = min(cantidad, pool_total)
+            self.stage_pool = random.sample(self.all_data_F, n_selecionar)
+            self.total_stages = len(self.stage_pool)
+        if self.difficulty == 'Medio':
+            pool_total = len(self.all_data_M)
+            n_selecionar = min(cantidad, pool_total)
+            self.stage_pool = random.sample(self.all_data_M, n_selecionar)
+            self.total_stages = len(self.stage_pool)
+        if self.difficulty == 'Dificil':
+            pool_total = len(self.all_data_D)
+            n_selecionar = min(cantidad, pool_total)
+            self.stage_pool = random.sample(self.all_data_D, n_selecionar)
+            self.total_stages = len(self.stage_pool)
+
         self.cargar_stage_actual()
 
     def cargar_stage_actual(self):
@@ -198,18 +216,27 @@ class GameState:
         id = self.current_stage - 1
         nivel_data = list(self.stage_pool[id].values())[0]
 
-        path_izq = nivel_data["img_izq"] + ".png" if "." not in nivel_data["img_izq"] else nivel_data["img_izq"]
-        path_der = nivel_data["img_der"] + ".png" if "." not in nivel_data["img_der"] else nivel_data["img_der"]
+        path_izq = nivel_data["img_izq"] + ".jpg" if "." not in nivel_data["img_izq"] else nivel_data["img_izq"]
+        path_der = nivel_data["img_der"] + ".jpg" if "." not in nivel_data["img_der"] else nivel_data["img_der"]
 
         self.img_izq = pygame.image.load(path_izq).convert_alpha()
         self.img_der = pygame.image.load(path_der).convert_alpha()
 
-        self.img_izq = pygame.transform.smoothscale(self.img_izq,(500,500))
-        self.img_der = pygame.transform.smoothscale(self.img_der,(500,500))
+        self.img_izq = pygame.transform.smoothscale(self.img_izq,(500,600))
+        self.img_der = pygame.transform.smoothscale(self.img_der,(500,600))
 
-        for key in ["punto1", "punto2", "punto3"]:
-            px, py = nivel_data[key]
-            self.difs_actuales.append((650 + px , 150 + py))
+        if self.difficulty == 'Facil':
+            for key in ["punto1", "punto2", "punto3"]:
+                px, py = nivel_data[key]
+                self.difs_actuales.append((650 + px , 100 + py))
+        if self.difficulty == 'Medio':
+            for key in ["punto1", "punto2", "punto3", "punto4", "punto5", "punto6"]:
+                px, py = nivel_data[key]
+                self.difs_actuales.append((650 + px , 100 + py))
+        if self.difficulty == 'Dificil':
+            for key in ["punto1", "punto2", "punto3", "punto4", "punto5", "punto6", "punto7", "punto8", "punto9"]:
+                px, py = nivel_data[key]
+                self.difs_actuales.append((650 + px , 100 + py))
 
     def draw_hud(self):
         pygame.draw.rect(screen,(220,220,220), (400,30,400,20), border_radius=10)
@@ -247,8 +274,8 @@ class GameState:
         self.draw_hud()
 
         if self.img_izq:
-            screen.blit(self.img_izq, (50, 150))
-            screen.blit(self.img_der, (650, 150))
+            screen.blit(self.img_izq, (50, 100))
+            screen.blit(self.img_der, (650, 100))
 
         for (dx, dy) in self.circles_draw:
             pygame.draw.circle(screen, color_aciertos, (dx, dy), 35, 5)
@@ -258,7 +285,7 @@ class GameState:
         pygame.display.flip()
     
     def procesar_clic(self, pos):
-        if not (650 <= pos[0] <= 1150 and 150 <= pos[1] <= 650):
+        if not (650 <= pos[0] <= 1150 and 100 <= pos[1] <= 700):
             return
 
         acierto = False

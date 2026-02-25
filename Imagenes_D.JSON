@@ -1,0 +1,155 @@
+
+{
+    "imgs": [
+    {
+        "id1": {
+            "img_izq": "Imagenes/A1",
+            "img_der": "Imagenes/Dificil/DB1",
+            "punto1": [493,145],
+            "punto2": [190,170],
+            "punto3": [140,292], 
+            "punto4": [55,475], 
+            "punto5": [10,220], 
+            "punto6": [150,130], 
+            "punto7": [317,492], 
+            "punto8": [450,480], 
+            "punto9": [400,260]
+            }
+    },
+    {
+        "id2": {
+            "img_izq": "Imagenes/A2",
+            "img_der": "Imagenes/Dificil/DB2",
+            "punto1": [16,177],
+            "punto2": [480,580],
+            "punto3": [145,350], 
+            "punto4": [440,10], 
+            "punto5": [350,410], 
+            "punto6": [50,300], 
+            "punto7": [270,420], 
+            "punto8": [207,35], 
+            "punto9": [145,110]
+            }
+    },
+    {
+        "id3": {
+            "img_izq": "Imagenes/A3",
+            "img_der": "Imagenes/Dificil/DB3",
+            "punto1": [280,547],
+            "punto2": [17,210],
+            "punto3": [195,295], 
+            "punto4": [410,200], 
+            "punto5": [80,225], 
+            "punto6": [285,120], 
+            "punto7": [380,485], 
+            "punto8": [195,320], 
+            "punto9": [105,320]
+            }
+    },
+    {
+        "id4": {
+            "img_izq": "Imagenes/A4",
+            "img_der": "Imagenes/Dificil/DB4",
+            "punto1": [50,570],
+            "punto2": [480,450],
+            "punto3": [290,50], 
+            "punto4": [440,20], 
+            "punto5": [160,510], 
+            "punto6": [480,585], 
+            "punto7": [240,470], 
+            "punto8": [140,140], 
+            "punto9": [30,50]
+            }
+    },
+    {
+        "id5": {
+            "img_izq": "Imagenes/A5",
+            "img_der": "Imagenes/Dificil/DB5",
+            "punto1": [455,545],
+            "punto2": [50,560],
+            "punto3": [130,130], 
+            "punto4": [150,350], 
+            "punto5": [10,100], 
+            "punto6": [185,560], 
+            "punto7": [390,80], 
+            "punto8": [250,60], 
+            "punto9": [360,330]
+            }
+    },
+    {
+        "id6": {
+            "img_izq": "Imagenes/A6",
+            "img_der": "Imagenes/Dificil/DB6",
+            "punto1": [315,200],
+            "punto2": [460,225],
+            "punto3": [160,350], 
+            "punto4": [363,10], 
+            "punto5": [420,300], 
+            "punto6": [60,140], 
+            "punto7": [150,125], 
+            "punto8": [260,310], 
+            "punto9": [150,230]
+            }
+    },
+    {
+        "id7": {
+            "img_izq": "Imagenes/A7",
+            "img_der": "Imagenes/Dificil/DB7",
+            "punto1": [180,530],
+            "punto2": [450,65],
+            "punto3": [460,230], 
+            "punto4": [150,20], 
+            "punto5": [160,450], 
+            "punto6": [390,280], 
+            "punto7": [470,580], 
+            "punto8": [260,400], 
+            "punto9": [260,160]
+            }
+    },
+    {
+        "id8": {
+            "img_izq": "Imagenes/A8",
+            "img_der": "Imagenes/Dificil/DB8",
+            "punto1": [40,490],
+            "punto2": [90,210],
+            "punto3": [440,440], 
+            "punto4": [260,480], 
+            "punto5": [240,175],  
+            "punto6": [115,550], 
+            "punto7": [20,590], 
+            "punto8": [20,265], 
+            "punto9": [410,155]
+            }
+    },
+    {
+        "id9": {
+            "img_izq": "Imagenes/A9",
+            "img_der": "Imagenes/Dificil/DB9",
+            "punto1": [15,330],
+            "punto2": [355,328],
+            "punto3": [270,550], 
+            "punto4": [460,350], 
+            "punto5": [255,270], 
+            "punto6": [185,300], 
+            "punto7": [25,290], 
+            "punto8": [410,330], 
+            "punto9": [305,345]
+            }
+    },
+    {
+        "id10": {
+            "img_izq": "Imagenes/A10",
+            "img_der": "Imagenes/Dificil/DB10",
+            "punto1": [350,330],
+            "punto2": [470,500],
+            "punto3": [120,400], 
+            "punto4": [40,385], 
+            "punto5": [220,400], 
+            "punto6": [280,240], 
+            "punto7": [410,430], 
+            "punto8": [460,280], 
+            "punto9": [20,70]
+            }
+    }
+    ]
+    }
