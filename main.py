@@ -4,6 +4,11 @@ import sys
 import math
 import json
 
+try:
+    from enfocate import EnfocateApp 
+except ImportError:
+    EnfocateApp = None
+
 pygame.init()
 pygame.mixer.init()
 screen_width, screen_height = 1280, 720
@@ -32,11 +37,11 @@ img_title = pygame.image.load("Imagenes/Titulo.png")
 img_background = pygame.image.load("Imagenes/menu.jpg").convert()
 img_background = pygame.transform.smoothscale(img_background, (screen_width, screen_height))
 
-#facil : 3 imamagenes, medio 6 , 9 dificil,
-# comprobar que todo funcione bien y que se vean las imagenes correspondientes en cada dificultad
-
 class GameState:
     def __init__(self):
+        self.tracker = None
+        if EnfocateApp:
+            self.tracker = EnfocateApp(project_id="Diferencias Grupo 3")
         self.state = 'MAIN_MENU'
         self.difficulty = None
         self.current_stage = 0
@@ -189,6 +194,9 @@ class GameState:
         self.state = 'PLAYING'
         self.current_stage = 1
 
+        if self.tracker:
+            self.tracker.start_session(activity_name="Diferencias", difficulty=self.difficulty)
+
         cantidad = 5 if self.difficulty == 'Facil' else 8 if self.difficulty == 'Medio' else 10
         if self.difficulty == 'Facil':
             pool_total = len(self.all_data_F)
@@ -298,14 +306,18 @@ class GameState:
                 if sonido_acierto:
                     sonido_acierto.play()
                 acierto = True
+
+                if self.tracker: self.tracker.register_hit(stage=self.current_stage)
                 break
         if not acierto:
             self.fallos_totales += 1
+            if self.tracker: self.tracker.register_miss(stage=self.current_stage)
             if self.difficulty != 'Facil':
                 if self.fallos_totales % self.fallos_vida == 0:
                     self.vidas -= 1
                 if self.vidas <= 0 or self.fallos_totales >= self.limite_fallos:
                     self.state = 'GAME_OVER'
+                    if self.tracker: self.tracker.end_session(result="Loss")
 
         if len(self.found_difs) == len(self.difs_actuales):
             self.draw_stage()
@@ -320,6 +332,7 @@ class GameState:
             if sonido_win:
                 sonido_win.play()
             self.state = 'Victory'
+            if self.tracker: self.tracker.end_session(result="Win")
     
     def draw_victory(self):
         self.dibujar_degradado((30, 80, 50), (85, 239, 196))
