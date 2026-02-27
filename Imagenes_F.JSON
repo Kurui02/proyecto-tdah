@@ -3,92 +3,47 @@
 "imgs": [
 {
     "id1": {
-        "img_izq": "Imagenes/A1",
+        "img_izq": "Imagenes/Facil/F1",
         "img_der": "Imagenes/Facil/FB1",
-        "punto1": [493,145],
-        "punto2": [190,170],
-        "punto3": [140,292]
+        "punto1": [225,340],
+        "punto2": [105,485],
+        "punto3": [380,510]
         }
 },
 {
     "id2": {
-        "img_izq": "Imagenes/A2",
+        "img_izq": "Imagenes/Facil/F2",
         "img_der": "Imagenes/Facil/FB2",
-        "punto1": [16,177],
-        "punto2": [480,580],
-        "punto3": [145,350]
+        "punto1": [250,300],
+        "punto2": [250,400],
+        "punto3": [150,465]
         }
 },
 {
     "id3": {
-        "img_izq": "Imagenes/A3",
+        "img_izq": "Imagenes/Facil/F3",
         "img_der": "Imagenes/Facil/FB3",
-        "punto1": [280,547],
-        "punto2": [17,210],
-        "punto3": [195,295]
+        "punto1": [250,220],
+        "punto2": [250,120],
+        "punto3": [250,425]
         }
 },
 {
     "id4": {
-        "img_izq": "Imagenes/A4",
+        "img_izq": "Imagenes/Facil/F4",
         "img_der": "Imagenes/Facil/FB4",
-        "punto1": [50,570],
-        "punto2": [480,450],
-        "punto3": [290,50]
+        "punto1": [320,180],
+        "punto2": [375,145],
+        "punto3": [325,385]
         }
 },
 {
     "id5": {
-        "img_izq": "Imagenes/A5",
+        "img_izq": "Imagenes/Facil/F5",
         "img_der": "Imagenes/Facil/FB5",
-        "punto1": [455,545],
-        "punto2": [50,560],
-        "punto3": [130,130]
-        }
-},
-{
-    "id6": {
-        "img_izq": "Imagenes/A6",
-        "img_der": "Imagenes/Facil/FB6",
-        "punto1": [315,200],
-        "punto2": [460,225],
-        "punto3": [160,350]
-        }
-},
-{
-    "id7": {
-        "img_izq": "Imagenes/A7",
-        "img_der": "Imagenes/Facil/FB7",
-        "punto1": [180,530],
-        "punto2": [450,65],
-        "punto3": [460,230]
-        }
-},
-{
-    "id8": {
-        "img_izq": "Imagenes/A8",
-        "img_der": "Imagenes/Facil/FB8",
-        "punto1": [40,490],
-        "punto2": [90,210],
-        "punto3": [440,440]
-        }
-},
-{
-    "id9": {
-        "img_izq": "Imagenes/A9",
-        "img_der": "Imagenes/Facil/FB9",
-        "punto1": [15,330],
-        "punto2": [355,328],
-        "punto3": [270,550]
-        }
-},
-{
-    "id10": {
-        "img_izq": "Imagenes/A10",
-        "img_der": "Imagenes/Facil/FB10",
-        "punto1": [350,330],
-        "punto2": [470,500],
-        "punto3": [120,400]
+        "punto1": [240,250],
+        "punto2": [280,480],
+        "punto3": [380,400]
         }
 }
 ]

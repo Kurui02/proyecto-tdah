@@ -4,6 +4,11 @@ import sys
 import math
 import json
 
+try:
+    from enfocate import EnfocateApp 
+except ImportError:
+    EnfocateApp = None
+
 pygame.init()
 pygame.mixer.init()
 screen_width, screen_height = 1280, 720
@@ -17,9 +22,11 @@ color_aciertos= (85,239,196)
 color_error = (255,107,107)
 white=(255,255,255)
 
-sonido_acierto = pygame.mixer.Sound("sonido/acierto.mp3")
+sonido_acierto = pygame.mixer.Sound("sonido/Acierto.mp3")
 sonido_win = pygame.mixer.Sound("sonido/win.mp3")
+sonido_error = pygame.mixer.Sound("sonido/Error.mp3")
 
+sonido_error.set_volume(0.3)
 sonido_acierto.set_volume(0.4) 
 sonido_win.set_volume(0.8)
 
@@ -32,11 +39,12 @@ img_title = pygame.image.load("Imagenes/Titulo.png")
 img_background = pygame.image.load("Imagenes/menu.jpg").convert()
 img_background = pygame.transform.smoothscale(img_background, (screen_width, screen_height))
 
-#facil : 3 imamagenes, medio 6 , 9 dificil,
-# comprobar que todo funcione bien y que se vean las imagenes correspondientes en cada dificultad
 
 class GameState:
     def __init__(self):
+        self.tracker = None
+        if EnfocateApp:
+            self.tracker = EnfocateApp(project_id="Diferencias Grupo 3")
         self.state = 'MAIN_MENU'
         self.difficulty = None
         self.current_stage = 0
@@ -155,11 +163,11 @@ class GameState:
 
         titulo_texto = f"MODO {self.difficulty.upper()}"
         if self.difficulty == 'Facil':
-            reglas = ["- Encuentra 3 diferencias por nivel.", "- Tienes fallos INFINITOS.", "- ¡Tómate tu tiempo para practicar!"]
+            reglas = ["- Encuentra 3 diferencias por nivel.", "- Tienes fallos INFINITOS.", "- ¡Recuerda en las diferencias grandes", "tocar siempre el centro!", "- ¡Tómate tu tiempo para practicar!"]
         elif self.difficulty == 'Medio':
-            reglas = [f"- Tienes 3 vidas.", f"- Cada 7 fallos pierdes 1 vida.", f"- Máximo {self.limite_fallos} fallos totales."]
+            reglas = [f"- Tienes 3 vidas.", f"- Cada 7 fallos pierdes 1 vida.", f"- Máximo {self.limite_fallos} fallos totales.", "¡Recuerda en las diferencias grandes", "tocar siempre el centro!"]
         else:
-            reglas = [f"- ¡Cuidado! Tienes 3 vidas.", f"- Cada 3 fallos pierdes 1 vida.", f"- Solo {self.limite_fallos} fallos permitidos."]
+            reglas = [f"- ¡Cuidado! Tienes 3 vidas.", f"- Cada 3 fallos pierdes 1 vida.", f"- Solo {self.limite_fallos} fallos permitidos.","¡Recuerda en las diferencias grandes", "tocar siempre el centro!"]
 
         t_surf = self.font_btns.render(titulo_texto, True, color_boton)
         screen.blit(t_surf, (screen_width//2 - t_surf.get_width()//2, 180))
@@ -185,9 +193,12 @@ class GameState:
             self.fallos_vida = 3
 
     def start_game (self):
-        pygame.mixer.music.stop()
+        
         self.state = 'PLAYING'
         self.current_stage = 1
+
+        if self.tracker:
+            self.tracker.start_session(activity_name="Diferencias", difficulty=self.difficulty)
 
         cantidad = 5 if self.difficulty == 'Facil' else 8 if self.difficulty == 'Medio' else 10
         if self.difficulty == 'Facil':
@@ -298,14 +309,20 @@ class GameState:
                 if sonido_acierto:
                     sonido_acierto.play()
                 acierto = True
+
+                if self.tracker: self.tracker.register_hit(stage=self.current_stage)
                 break
         if not acierto:
             self.fallos_totales += 1
+            if self.tracker: self.tracker.register_miss(stage=self.current_stage)
             if self.difficulty != 'Facil':
                 if self.fallos_totales % self.fallos_vida == 0:
                     self.vidas -= 1
                 if self.vidas <= 0 or self.fallos_totales >= self.limite_fallos:
                     self.state = 'GAME_OVER'
+                    if self.tracker: self.tracker.end_session(result="Loss")
+            if sonido_error:
+                    sonido_error.play()
 
         if len(self.found_difs) == len(self.difs_actuales):
             self.draw_stage()
@@ -320,6 +337,7 @@ class GameState:
             if sonido_win:
                 sonido_win.play()
             self.state = 'Victory'
+            if self.tracker: self.tracker.end_session(result="Win")
     
     def draw_victory(self):
         self.dibujar_degradado((30, 80, 50), (85, 239, 196))
