@@ -5,41 +5,24 @@ import math
 import json
 from enfocate import GameBase, GameMetadata
 
+color_fondo = (55, 55, 60)
+color_boton = (160, 196, 255)
+color_hover = (160, 246, 255)
+color_texto = (240, 240, 240)
+color_aciertos = (85, 239, 196)
+color_error = (255, 107, 107)
+white = (255, 255, 255)
 
-
-pygame.init()
-pygame.mixer.init()
-screen_width, screen_height = 1280, 720
-screen = pygame.display.set_mode((screen_width,screen_height))
-
-color_fondo= (55,55,60)
-color_boton= (160,196,255)
-color_hover= (160,246,255)
-color_texto= (240,240,240)
-color_aciertos= (85,239,196)
-color_error = (255,107,107)
-white=(255,255,255)
-
-sonido_acierto = pygame.mixer.Sound("sonido/Acierto.mp3")
-sonido_win = pygame.mixer.Sound("sonido/win.mp3")
-sonido_error = pygame.mixer.Sound("sonido/Error.mp3")
-
-sonido_error.set_volume(0.3)
-sonido_acierto.set_volume(0.4) 
-sonido_win.set_volume(0.8)
-
-pygame.mixer.music.load("sonido/menu.mp3")
-pygame.mixer.music.set_volume(0.1)
-pygame.mixer.music.play(-1)
-
-img_title = pygame.image.load("Imagenes/Titulo.png")
-
-img_background = pygame.image.load("Imagenes/menu.jpg").convert()
-img_background = pygame.transform.smoothscale(img_background, (screen_width, screen_height))
-
-class Juego:
+class MiJuego(GameBase):
     def __init__(self):
-
+        meta = GameMetadata(
+            title="Encuentra las diferencias",
+            description="Juego de concentración de encontrar diferencias",
+            authors=["Marcelys Tebres", "Jose Areinamo", "Frednali Fernandez", "Joswar Ramirez"],
+            group_number=3
+        )
+        super().__init__(meta)
+    
         self.state = 'MAIN_MENU'
         self.difficulty = None
         self.current_stage = 0
@@ -49,112 +32,166 @@ class Juego:
         self.difs_actuales = [] 
         self.circles_draw = []
 
-        self.vidas= 3
-        self.fallos_totales= 0
+        self.vidas = 3
+        self.fallos_totales = 0
         self.limite_fallos = 0
         self.fallos_vida = 0
 
         self.zoom_factor = 0
         self.zoom_dir = 0.5
+        
+        self.mouse_was_pressed = False
 
-        with open("Imagenes/Imagenes_F.JSON","r") as imgF:
-            self.all_data_F = json.load(imgF)["imgs"]
-        
-        with open("Imagenes/Imagenes_M.JSON","r") as imgM:
-            self.all_data_M = json.load(imgM)["imgs"]
-        
-        with open("Imagenes/Imagenes_D.JSON","r") as imgD:
-            self.all_data_D = json.load(imgD)["imgs"]
+        with open("Imagenes/Imagenes_F.JSON", "r") as imgF: self.all_data_F = json.load(imgF)["imgs"]
+        with open("Imagenes/Imagenes_M.JSON", "r") as imgM: self.all_data_M = json.load(imgM)["imgs"]
+        with open("Imagenes/Imagenes_D.JSON", "r") as imgD: self.all_data_D = json.load(imgD)["imgs"]
+
+        self.btn_jugar = pygame.Rect(0,0,0,0)
+        self.btn_salir = pygame.Rect(0,0,0,0)
+        self.btn_facil = pygame.Rect(0,0,0,0)
+        self.btn_medio = pygame.Rect(0,0,0,0)
+        self.btn_dificil = pygame.Rect(0,0,0,0)
+        self.btn_atras = pygame.Rect(0,0,0,0)
+        self.btn_entendido = pygame.Rect(0,0,0,0)
+        self.btn_volver = pygame.Rect(0,0,0,0)
+        self.btn_reintentar = pygame.Rect(0,0,0,0)
+        self.btn_volver_menu = pygame.Rect(0,0,0,0)
+
+    def on_start(self):
+        self.screen_width = self.surface.get_width()
+        self.screen_height = self.surface.get_height()
 
         self.font_title = pygame.font.SysFont("Arial", 80, bold=True)
-        self.font_btns = pygame.font.SysFont("Arial", 35 , bold=True)
-        self.font_ui = pygame.font.SysFont('Arial', 25 , bold=True)
+        self.font_btns = pygame.font.SysFont("Arial", 35, bold=True)
+        self.font_ui = pygame.font.SysFont('Arial', 25, bold=True)
 
-        self.img_izq= None
-        self.img_der= None
+        self.img_izq = None
+        self.img_der = None
+        self.img_title = pygame.image.load("Imagenes/Titulo.png").convert_alpha()
+        img_bg = pygame.image.load("Imagenes/menu.jpg").convert()
+        self.img_background = pygame.transform.smoothscale(img_bg, (self.screen_width, self.screen_height))
 
-        self.img_corazon = pygame.image.load("Imagenes/corazon.png").convert_alpha()
-        self.img_corazon = pygame.transform.smoothscale(self.img_corazon, (50, 50))
-
+        corazon = pygame.image.load("Imagenes/corazon.png").convert_alpha()
+        self.img_corazon = pygame.transform.smoothscale(corazon, (50, 50))
         self.img_corazon_gris = self.img_corazon.copy()
         self.img_corazon_gris.fill((60, 60, 60, 255), special_flags=pygame.BLEND_RGBA_MULT)
+
+        self.sonido_acierto = pygame.mixer.Sound("sonido/acierto.mp3")
+        self.sonido_win = pygame.mixer.Sound("sonido/win.mp3")
+        self.sonido_error = pygame.mixer.Sound("sonido/Error.mp3")
+
+        self.sonido_error.set_volume(0.3)
+        self.sonido_acierto.set_volume(0.4) 
+        self.sonido_win.set_volume(0.8)
+
+        pygame.mixer.music.load("sonido/menu.mp3")
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(-1)
+
+    def update(self, dt: float):
+        mouse_pressed = pygame.mouse.get_pressed()[0]
+        just_clicked = mouse_pressed and not self.mouse_was_pressed
+        self.mouse_was_pressed = mouse_pressed
+
+        if just_clicked:
+            pos = pygame.mouse.get_pos()
+
+            if self.state == 'MAIN_MENU':
+                if self.btn_jugar.collidepoint(pos): self.state = 'DIFF_MENU'
+                elif self.btn_salir.collidepoint(pos): sys.exit() 
+            
+            elif self.state == 'DIFF_MENU':
+                if self.btn_facil.collidepoint(pos): self.set_difficulty('Facil')
+                elif self.btn_medio.collidepoint(pos): self.set_difficulty('Medio')
+                elif self.btn_dificil.collidepoint(pos): self.set_difficulty('Dificil')
+                elif self.btn_atras.collidepoint(pos): self.state = 'MAIN_MENU'
+            
+            elif self.state == 'PRE_GAME':
+                if self.btn_entendido.collidepoint(pos): self.start_game()
+
+            elif self.state == 'PLAYING':
+                self.procesar_clic(pos)
+            
+            elif self.state == 'Victory':
+                if self.btn_volver.collidepoint(pos): self.state = 'MAIN_MENU'
+            
+            elif self.state == 'GAME_OVER':
+                if self.btn_reintentar.collidepoint(pos): 
+                    self.set_difficulty(self.difficulty) 
+                    self.start_game() 
+                elif self.btn_volver_menu.collidepoint(pos): self.state = 'MAIN_MENU'
+
+    def draw(self):
+        if self.state == 'MAIN_MENU': self.draw_main_menu()
+        elif self.state == 'DIFF_MENU': self.draw_diff_menu()
+        elif self.state == 'PRE_GAME': self.draw_pre_game()
+        elif self.state == 'PLAYING': self.draw_stage()
+        elif self.state == 'Victory': self.draw_victory()
+        elif self.state == 'GAME_OVER': self.draw_game_over()
     
     def dibujar_degradado(self, color_inicio, color_fin):
-        for y in range(0, screen_height, 2):
-            r = color_inicio[0] + (color_fin[0] - color_inicio[0]) * y // screen_height
-            g = color_inicio[1] + (color_fin[1] - color_inicio[1]) * y // screen_height
-            b = color_inicio[2] + (color_fin[2] - color_inicio[2]) * y // screen_height
-            pygame.draw.rect(screen, (r, g, b), (0, y, screen_width, 2))
+        for y in range(0, self.screen_height, 2):
+            r = color_inicio[0] + (color_fin[0] - color_inicio[0]) * y // self.screen_height
+            g = color_inicio[1] + (color_fin[1] - color_inicio[1]) * y // self.screen_height
+            b = color_inicio[2] + (color_fin[2] - color_inicio[2]) * y // self.screen_height
+            pygame.draw.rect(self.surface, (r, g, b), (0, y, self.screen_width, 2))
     
-    def crear_boton(self,texto,y_pos,ancho=300,alto=70, palpitar = False):
-        x_pos = (screen_width // 2) - (ancho // 2)
+    def crear_boton(self, texto, y_pos, ancho=300, alto=70, palpitar=False):
+        x_pos = (self.screen_width // 2) - (ancho // 2)
         mouse_pos = pygame.mouse.get_pos()
-        rect_temp = pygame.Rect(x_pos,y_pos,ancho,alto)
+        rect_temp = pygame.Rect(x_pos, y_pos, ancho, alto)
 
         if palpitar and rect_temp.collidepoint(mouse_pos):
-            self.zoom_factor += 0.0005 * self.zoom_dir
-            if self.zoom_factor>0.08 or self.zoom_factor <0:
-                self.zoom_dir *= -1
-            
+            self.zoom_factor += 0.005 * self.zoom_dir
+            if self.zoom_factor > 0.08 or self.zoom_factor < 0: self.zoom_dir *= -1
             ancho += int(ancho * self.zoom_factor)
             alto += int(alto * self.zoom_factor)
-            x_pos = (screen_width // 2) - (ancho // 2)
+            x_pos = (self.screen_width // 2) - (ancho // 2)
         elif palpitar:
             self.zoom_factor = 0
 
-        rect = pygame.Rect(x_pos,y_pos,ancho,alto)
+        rect = pygame.Rect(x_pos, y_pos, ancho, alto)
         color = color_hover if rect.collidepoint(mouse_pos) else color_boton
-        sombra = (40,40,45)
+        sombra = (40, 40, 45)
 
-        pygame.draw.rect(screen, sombra, (rect.x + 6, rect.y + 6, ancho, alto), border_radius=20)
-        pygame.draw.rect(screen, color, rect, border_radius=20)
-        pygame.draw.rect(screen, white, rect, 4, border_radius=20)
+        pygame.draw.rect(self.surface, sombra, (rect.x + 6, rect.y + 6, ancho, alto), border_radius=20)
+        pygame.draw.rect(self.surface, color, rect, border_radius=20)
+        pygame.draw.rect(self.surface, white, rect, 4, border_radius=20)
 
         text_surf = self.font_btns.render(texto, True, white)
         text_rect = text_surf.get_rect(center=rect.center)
-        screen.blit(text_surf, text_rect)
-
+        self.surface.blit(text_surf, text_rect)
         return rect
     
     def draw_main_menu(self):
-        if not pygame.mixer.music.get_busy():
-            pygame.mixer.music.play(-1)
-        if img_background:
-            screen.blit(img_background,(0,0))
-        else:
-            screen.fill(color_fondo)
+        if not pygame.mixer.music.get_busy(): pygame.mixer.music.play(-1)
+        if self.img_background: self.surface.blit(self.img_background, (0, 0))
+        else: self.surface.fill(color_fondo)
             
-        
-        screen.blit(img_title, (screen_width//2 - img_title.get_width()//2, 25))
-
+        self.surface.blit(self.img_title, (self.screen_width // 2 - self.img_title.get_width() // 2, 25))
         self.btn_jugar = self.crear_boton("JUGAR", 320, palpitar=True)
         self.btn_salir = self.crear_boton("SALIR", 450)
-        pygame.display.flip()
     
     def draw_diff_menu(self):
-        if img_background:
-            screen.blit(img_background, (0,0))
-        else:
-            screen.fill(color_fondo)
+        if self.img_background: self.surface.blit(self.img_background, (0, 0))
+        else: self.surface.fill(color_fondo)
 
         subtitulo = self.font_btns.render("Selecciona la Dificultad", True, color_fondo)
-        screen.blit(subtitulo, (screen_width//2 - subtitulo.get_width()//2, 200))
-
+        self.surface.blit(subtitulo, (self.screen_width // 2 - subtitulo.get_width() // 2, 200))
         self.btn_facil = self.crear_boton("FÁCIL", 300)
         self.btn_medio = self.crear_boton("MEDIO", 400)
         self.btn_dificil = self.crear_boton("DIFÍCIL", 500)
         self.btn_atras = self.crear_boton("ATRÁS", 620, ancho=150, alto=50)
-        pygame.display.flip()
     
     def draw_pre_game(self):
-        overlay = pygame.Surface((screen_width,screen_height))
+        overlay = pygame.Surface((self.screen_width, self.screen_height))
         overlay.set_alpha(180)
-        overlay.fill((20,20,25))
-        screen.blit(overlay, (0,0))
+        overlay.fill((20, 20, 25))
+        self.surface.blit(overlay, (0, 0))
 
-        cartel_rect = pygame.Rect(screen_width//2 - 350, 150, 700, 400)
-        pygame.draw.rect(screen, color_fondo, cartel_rect, border_radius=30)
-        pygame.draw.rect(screen, white, cartel_rect, 5, border_radius=30)
+        cartel_rect = pygame.Rect(self.screen_width // 2 - 350, 150, 700, 400)
+        pygame.draw.rect(self.surface, color_fondo, cartel_rect, border_radius=30)
+        pygame.draw.rect(self.surface, white, cartel_rect, 5, border_radius=30)
 
         titulo_texto = f"MODO {self.difficulty.upper()}"
         if self.difficulty == 'Facil':
@@ -165,21 +202,18 @@ class Juego:
             reglas = [f"- ¡Cuidado! Tienes 3 vidas.", f"- Cada 3 fallos pierdes 1 vida.", f"- Solo {self.limite_fallos} fallos permitidos.","¡Recuerda en las diferencias grandes", "tocar siempre el centro!"]
 
         t_surf = self.font_btns.render(titulo_texto, True, color_boton)
-        screen.blit(t_surf, (screen_width//2 - t_surf.get_width()//2, 180))
+        self.surface.blit(t_surf, (self.screen_width // 2 - t_surf.get_width() // 2, 180))
         for i, regla in enumerate(reglas):
             r_surf = self.font_ui.render(regla, True, white)
-            screen.blit(r_surf, (cartel_rect.x + 50, 260 + (i * 40)))
+            self.surface.blit(r_surf, (cartel_rect.x + 50, 260 + (i * 40)))
         self.btn_entendido = self.crear_boton("¡ENTENDIDO!", 450, ancho=250, alto=60)
-        pygame.display.flip()
     
-    def set_difficulty (self, diff_level):
+    def set_difficulty(self, diff_level):
         self.difficulty = diff_level
         self.state = 'PRE_GAME'
         self.vidas = 3
         self.fallos_totales = 0
-
-        if self.difficulty == 'Facil':
-            self.limite_fallos = 999 
+        if self.difficulty == 'Facil': self.limite_fallos = 999 
         elif self.difficulty == 'Medio':
             self.limite_fallos = 21
             self.fallos_vida = 7
@@ -187,109 +221,69 @@ class Juego:
             self.limite_fallos = 9
             self.fallos_vida = 3
 
-    def start_game (self):
-        
+    def start_game(self):
         self.state = 'PLAYING'
         self.current_stage = 1
-
         cantidad = 5 if self.difficulty == 'Facil' else 8 if self.difficulty == 'Medio' else 10
-        if self.difficulty == 'Facil':
-            pool_total = len(self.all_data_F)
-            n_selecionar = min(cantidad, pool_total)
-            self.stage_pool = random.sample(self.all_data_F, n_selecionar)
-            self.total_stages = len(self.stage_pool)
-        if self.difficulty == 'Medio':
-            pool_total = len(self.all_data_M)
-            n_selecionar = min(cantidad, pool_total)
-            self.stage_pool = random.sample(self.all_data_M, n_selecionar)
-            self.total_stages = len(self.stage_pool)
-        if self.difficulty == 'Dificil':
-            pool_total = len(self.all_data_D)
-            n_selecionar = min(cantidad, pool_total)
-            self.stage_pool = random.sample(self.all_data_D, n_selecionar)
-            self.total_stages = len(self.stage_pool)
+        
+        if self.difficulty == 'Facil': self.stage_pool = random.sample(self.all_data_F, min(cantidad, len(self.all_data_F)))
+        elif self.difficulty == 'Medio': self.stage_pool = random.sample(self.all_data_M, min(cantidad, len(self.all_data_M)))
+        elif self.difficulty == 'Dificil': self.stage_pool = random.sample(self.all_data_D, min(cantidad, len(self.all_data_D)))
 
+        self.total_stages = len(self.stage_pool)
         self.cargar_stage_actual()
 
     def cargar_stage_actual(self):
-        self.found_difs = []
-        self.circles_draw = []
-        self.difs_actuales = []
-
-        id = self.current_stage - 1
-        nivel_data = list(self.stage_pool[id].values())[0]
+        self.found_difs = []; self.circles_draw = []; self.difs_actuales = []
+        id_actual = self.current_stage - 1
+        nivel_data = list(self.stage_pool[id_actual].values())[0]
 
         path_izq = nivel_data["img_izq"] + ".jpg" if "." not in nivel_data["img_izq"] else nivel_data["img_izq"]
         path_der = nivel_data["img_der"] + ".jpg" if "." not in nivel_data["img_der"] else nivel_data["img_der"]
 
-        self.img_izq = pygame.image.load(path_izq).convert_alpha()
-        self.img_der = pygame.image.load(path_der).convert_alpha()
+        self.img_izq = pygame.transform.smoothscale(pygame.image.load(path_izq).convert_alpha(), (500, 600))
+        self.img_der = pygame.transform.smoothscale(pygame.image.load(path_der).convert_alpha(), (500, 600))
 
-        self.img_izq = pygame.transform.smoothscale(self.img_izq,(500,600))
-        self.img_der = pygame.transform.smoothscale(self.img_der,(500,600))
+        if self.difficulty == 'Facil': puntos = ["punto1", "punto2", "punto3"]
+        elif self.difficulty == 'Medio': puntos = ["punto1", "punto2", "punto3", "punto4", "punto5", "punto6"]
+        else: puntos = ["punto1", "punto2", "punto3", "punto4", "punto5", "punto6", "punto7", "punto8", "punto9"]
 
-        if self.difficulty == 'Facil':
-            for key in ["punto1", "punto2", "punto3"]:
-                px, py = nivel_data[key]
-                self.difs_actuales.append((650 + px , 100 + py))
-        if self.difficulty == 'Medio':
-            for key in ["punto1", "punto2", "punto3", "punto4", "punto5", "punto6"]:
-                px, py = nivel_data[key]
-                self.difs_actuales.append((650 + px , 100 + py))
-        if self.difficulty == 'Dificil':
-            for key in ["punto1", "punto2", "punto3", "punto4", "punto5", "punto6", "punto7", "punto8", "punto9"]:
-                px, py = nivel_data[key]
-                self.difs_actuales.append((650 + px , 100 + py))
+        for key in puntos:
+            px, py = nivel_data[key]
+            self.difs_actuales.append((650 + px , 100 + py))
 
     def draw_hud(self):
-        pygame.draw.rect(screen,(220,220,220), (400,30,400,20), border_radius=10)
-
-        ancho_progreso = (self.current_stage / self.total_stages) *400
-        pygame.draw.rect(screen, color_aciertos, (400,30, ancho_progreso, 20), border_radius=10)
+        pygame.draw.rect(self.surface, (220, 220, 220), (400, 30, 400, 20), border_radius=10)
+        ancho_progreso = (self.current_stage / self.total_stages) * 400
+        pygame.draw.rect(self.surface, color_aciertos, (400, 30, ancho_progreso, 20), border_radius=10)
 
         ui_text = self.font_ui.render(f"Dificultad: {self.difficulty} | Stage: {self.current_stage}/{self.total_stages}", True, color_texto)
-        screen.blit(ui_text, (20,20))
+        self.surface.blit(ui_text, (20, 20))
 
         txt_fallos = f"Fallos {self.fallos_totales}/{self.limite_fallos if self.difficulty != 'Facil' else '∞'}"
         fallos_surf = self.font_ui.render(txt_fallos, True, color_texto)
-        screen.blit(fallos_surf, (screen_width - 350, 20))
+        self.surface.blit(fallos_surf, (self.screen_width - 350, 20))
 
         for i in range(3):
-            x_pos = screen_width - 180 + (i * 55)
+            x_pos = self.screen_width - 180 + (i * 55)
             y_pos = 15
-            if i < self.vidas:
-                screen.blit(self.img_corazon, (x_pos, y_pos))
-            else:
-                screen.blit(self.img_corazon_gris, (x_pos, y_pos))
-    
-    def animacion(self):
-        rect_progreso = 0
-        velocidad = 20
-        while rect_progreso < screen_width:
-            pygame.draw.rect(screen, color_fondo, (0, 0, rect_progreso, screen_height))
-            
-            pygame.display.update()
-            rect_progreso += velocidad
-            pygame.time.Clock().tick(60)
+            if i < self.vidas: self.surface.blit(self.img_corazon, (x_pos, y_pos))
+            else: self.surface.blit(self.img_corazon_gris, (x_pos, y_pos))
 
     def draw_stage(self):
-        self.dibujar_degradado((20,25,40),(60,70,90))
+        self.dibujar_degradado((20, 25, 40), (60, 70, 90))
         self.draw_hud()
 
         if self.img_izq:
-            screen.blit(self.img_izq, (50, 100))
-            screen.blit(self.img_der, (650, 100))
+            self.surface.blit(self.img_izq, (50, 100))
+            self.surface.blit(self.img_der, (650, 100))
 
         for (dx, dy) in self.circles_draw:
-            pygame.draw.circle(screen, color_aciertos, (dx, dy), 35, 5)
-
-            pygame.draw.circle(screen, color_aciertos, (dx - 600, dy), 35, 5)
-        
-        pygame.display.flip()
+            pygame.draw.circle(self.surface, color_aciertos, (dx, dy), 35, 5)
+            pygame.draw.circle(self.surface, color_aciertos, (dx - 600, dy), 35, 5)
     
     def procesar_clic(self, pos):
-        if not (650 <= pos[0] <= 1150 and 100 <= pos[1] <= 700):
-            return
+        if not (650 <= pos[0] <= 1150 and 100 <= pos[1] <= 700): return
 
         acierto = False
         for i , (dx, dy) in enumerate(self.difs_actuales):
@@ -297,123 +291,43 @@ class Juego:
             if distancia < 35 and i not in self.found_difs:
                 self.found_difs.append(i)
                 self.circles_draw.append((dx, dy))
-
-                if sonido_acierto:
-                    sonido_acierto.play()
+                self.sonido_acierto.play()
                 acierto = True
-
                 break
+                
         if not acierto:
             self.fallos_totales += 1
+            self.sonido_error.play()
             if self.difficulty != 'Facil':
-                if self.fallos_totales % self.fallos_vida == 0:
-                    self.vidas -= 1
+                if self.fallos_totales % self.fallos_vida == 0: self.vidas -= 1
                 if self.vidas <= 0 or self.fallos_totales >= self.limite_fallos:
                     self.state = 'GAME_OVER'
 
-            if sonido_error:
-                    sonido_error.play()
-
         if len(self.found_difs) == len(self.difs_actuales):
-            self.draw_stage()
-            pygame.time.delay(500)
-            self.animacion()
+            pygame.time.delay(300) 
             self.pasar_siguiente_stage()
+
     def pasar_siguiente_stage(self):
         if self.current_stage < self.total_stages:
-            self.current_stage +=1
+            self.current_stage += 1
             self.cargar_stage_actual()
         else:
-            if sonido_win:
-                sonido_win.play()
+            self.sonido_win.play()
             self.state = 'Victory'
     
     def draw_victory(self):
         self.dibujar_degradado((30, 80, 50), (85, 239, 196))
-        texto = self.font_title.render("¡LO LOGRASTE!", True , white)
+        texto = self.font_title.render("¡LO LOGRASTE!", True, white)
         info = self.font_ui.render(f"Superado con {self.fallos_totales} fallos y {self.vidas} vidas", True, white)
-        screen.blit(texto, (screen_width//2 - texto.get_width()//2, 250))
-        screen.blit(info, (screen_width//2 - info.get_width()//2, 350))
-        self.btn_volver = self.crear_boton("Menú Principal",450)
-        pygame.display.flip()
+        self.surface.blit(texto, (self.screen_width // 2 - texto.get_width() // 2, 250))
+        self.surface.blit(info, (self.screen_width // 2 - info.get_width() // 2, 350))
+        self.btn_volver = self.crear_boton("Menú Principal", 450)
 
     def draw_game_over(self):
         self.dibujar_degradado((80, 20, 20), (255, 100, 100))
-        texto = self.font_title.render("¡OH, HAS PERDIDO!", True , white)
+        texto = self.font_title.render("¡OH, HAS PERDIDO!", True, white)
         sub = self.font_btns.render("Vuelve a intentarlo", True, white)
-        screen.blit(texto, (screen_width//2 - texto.get_width()//2, 200))
-        screen.blit(sub, (screen_width//2 - sub.get_width()//2, 300))
+        self.surface.blit(texto, (self.screen_width // 2 - texto.get_width() // 2, 200))
+        self.surface.blit(sub, (self.screen_width // 2 - sub.get_width() // 2, 300))
         self.btn_reintentar = self.crear_boton("Reintentar", 400)
         self.btn_volver_menu = self.crear_boton("Menú Principal", 500)
-        pygame.display.flip()
-
-class MiJuego(GameBase):
-    def __init__(self):
-        
-        meta = GameMetadata(
-            title="Encuentra las diferencias",
-            description="Juego de concentracion de encontrar diferencias",
-            authors=["Marcelys Tebres","Jose Areinamo","Frednali Fernandez", "Joswar Ramirez"],
-            group_number=3
-        )
-        
-        super().__init__(meta)
-        
-        self.state = 'MAIN_MENU'
-
-    def on_start(self):
-       self.juego = Juego(self)
-
-    def update(self, dt: float):
-           
-        if self.state == 'MAIN_MENU':
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.juego.btn_jugar.collidepoint(event.pos):
-                    self.state = 'DIFF_MENU'
-                elif self.juego.btn_salir.collidepoint(event.pos):
-                    running = False
-       
-        if self.state == 'DIFF_MENU':
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.juego.btn_facil.collidepoint(event.pos): self.juego.set_difficulty('Facil')
-                elif self.juego.btn_medio.collidepoint(event.pos): self.juego.set_difficulty('Medio')
-                elif self.juego.btn_dificil.collidepoint(event.pos): self.juego.set_difficulty('Dificil')
-                elif self.juego.btn_atras.collidepoint(event.pos): self.state = 'MAIN_MENU'
-        
-        if self.state == 'PRE_GAME':
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.juego.btn_entendido.collidepoint(event.pos): self.juego.start_game()
-
-        if self.state == 'PLAYING':
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                self.juego.procesar_clic(event.pos)
-        
-        if self.state == 'Victory':
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.juego.btn_volver.collidepoint(event.pos): self.state = 'MAIN_MENU'
-        
-        if self.state == 'GAME_OVER':
-            if event.type == pygame.MOUSEBUTTONDOWN:   
-                if self.juego.btn_reintentar.collidepoint(event.pos): 
-                    self.juego.set_difficulty(self.juego.difficulty) 
-                    self.juego.start_game() 
-                elif self.juego.btn_volver_menu.collidepoint(event.pos): self.state = 'MAIN_MENU'
-
-    def draw(self):
-    
-        if self.state == 'MAIN_MENU':
-            self.juego.draw_main_menu()
-        elif self.state == 'DIFF_MENU':
-            self.juego.draw_diff_menu()
-        elif self.state == 'PRE_GAME':
-            self.juego.draw_pre_game()
-        elif self.state == 'PLAYING':
-            self.juego.draw_stage()
-        elif self.state == 'Victory':
-            self.juego.draw_victory()
-        elif self.state == 'GAME_OVER':
-            self.juego.draw_game_over()
-
-pygame.quit()
-
-    
