@@ -3,7 +3,10 @@ import random
 import sys
 import math
 import json
+from pathlib import Path
 from enfocate import GameBase, GameMetadata
+
+Dir = Path(__file__).resolve().parent.parent
 
 color_fondo = (55, 55, 60)
 color_boton = (160, 196, 255)
@@ -42,9 +45,13 @@ class MiJuego(GameBase):
         
         self.mouse_was_pressed = False
 
-        with open("Imagenes/Imagenes_F.JSON", "r") as imgF: self.all_data_F = json.load(imgF)["imgs"]
-        with open("Imagenes/Imagenes_M.JSON", "r") as imgM: self.all_data_M = json.load(imgM)["imgs"]
-        with open("Imagenes/Imagenes_D.JSON", "r") as imgD: self.all_data_D = json.load(imgD)["imgs"]
+        ruta_f = Dir / "Imagenes" / "Imagenes_F.JSON"
+        ruta_m = Dir / "Imagenes" / "Imagenes_M.JSON"
+        ruta_d = Dir / "Imagenes" / "Imagenes_D.JSON"
+
+        with open(ruta_f, "r") as imgF: self.all_data_F = json.load(imgF)["imgs"]
+        with open(ruta_m, "r") as imgM: self.all_data_M = json.load(imgM)["imgs"]
+        with open(ruta_d, "r") as imgD: self.all_data_D = json.load(imgD)["imgs"]
 
         self.btn_jugar = pygame.Rect(0,0,0,0)
         self.btn_salir = pygame.Rect(0,0,0,0)
@@ -67,24 +74,34 @@ class MiJuego(GameBase):
 
         self.img_izq = None
         self.img_der = None
-        self.img_title = pygame.image.load("Imagenes/Titulo.png").convert_alpha()
-        img_bg = pygame.image.load("Imagenes/menu.jpg").convert()
+
+        path_titulo = Dir / "Imagenes" / "Titulo.png"
+        path_menu_bg = Dir / "Imagenes" / "menu.jpg"
+        path_corazon = Dir / "Imagenes" / "corazon.png"
+
+        self.img_title = pygame.image.load(str(path_titulo)).convert_alpha()
+        img_bg = pygame.image.load(str(path_menu_bg)).convert()
         self.img_background = pygame.transform.smoothscale(img_bg, (self.screen_width, self.screen_height))
 
-        corazon = pygame.image.load("Imagenes/corazon.png").convert_alpha()
+        corazon = pygame.image.load(str(path_corazon)).convert_alpha()
         self.img_corazon = pygame.transform.smoothscale(corazon, (50, 50))
         self.img_corazon_gris = self.img_corazon.copy()
         self.img_corazon_gris.fill((60, 60, 60, 255), special_flags=pygame.BLEND_RGBA_MULT)
 
-        self.sonido_acierto = pygame.mixer.Sound("sonido/acierto.mp3")
-        self.sonido_win = pygame.mixer.Sound("sonido/win.mp3")
-        self.sonido_error = pygame.mixer.Sound("sonido/Error.mp3")
+        acierto = Dir / "sonido" / "acierto.mp3"
+        win = Dir / "sonido" / "win.mp3"
+        error = Dir / "sonido" / "Error.mp3"
+        musica = Dir / "sonido" / "menu.mp3"
+
+        self.sonido_acierto = pygame.mixer.Sound(str(acierto))
+        self.sonido_win = pygame.mixer.Sound(str(win))
+        self.sonido_error = pygame.mixer.Sound(str(error))
 
         self.sonido_error.set_volume(0.3)
         self.sonido_acierto.set_volume(0.4) 
         self.sonido_win.set_volume(0.8)
 
-        pygame.mixer.music.load("sonido/menu.mp3")
+        pygame.mixer.music.load(str(musica))
         pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play(-1)
 
@@ -241,8 +258,11 @@ class MiJuego(GameBase):
         path_izq = nivel_data["img_izq"] + ".jpg" if "." not in nivel_data["img_izq"] else nivel_data["img_izq"]
         path_der = nivel_data["img_der"] + ".jpg" if "." not in nivel_data["img_der"] else nivel_data["img_der"]
 
-        self.img_izq = pygame.transform.smoothscale(pygame.image.load(path_izq).convert_alpha(), (500, 600))
-        self.img_der = pygame.transform.smoothscale(pygame.image.load(path_der).convert_alpha(), (500, 600))
+        izq = Dir / path_izq
+        der = Dir / path_der
+
+        self.img_izq = pygame.transform.smoothscale(pygame.image.load(str(izq)).convert_alpha(), (500, 600))
+        self.img_der = pygame.transform.smoothscale(pygame.image.load(str(der)).convert_alpha(), (500, 600))
 
         if self.difficulty == 'Facil': puntos = ["punto1", "punto2", "punto3"]
         elif self.difficulty == 'Medio': puntos = ["punto1", "punto2", "punto3", "punto4", "punto5", "punto6"]
