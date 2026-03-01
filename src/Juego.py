@@ -115,7 +115,7 @@ class MiJuego(GameBase):
 
             if self.state == 'MAIN_MENU':
                 if self.btn_jugar.collidepoint(pos): self.state = 'DIFF_MENU'
-                elif self.btn_salir.collidepoint(pos): sys.exit() 
+                elif self.btn_salir.collidepoint(pos): self._stop_context()
             
             elif self.state == 'DIFF_MENU':
                 if self.btn_facil.collidepoint(pos): self.set_difficulty('Facil')
